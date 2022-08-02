@@ -29,18 +29,13 @@ def setCPUAffinity():
 
 
 def setTCPTimestamps(enabled=True):
-    fh = open('/proc/sys/net/ipv4/tcp_timestamps', 'r+b')
-    ret_val = False
-    if fh.read(1) == b'1':
-        ret_val = True
-
-    fh.seek(0)
-    if enabled:
-        fh.write(b'1')
-    else:
-        fh.write(b'0')
-    fh.close()
-
+    with open('/proc/sys/net/ipv4/tcp_timestamps', 'r+b') as fh:
+        ret_val = fh.read(1) == b'1'
+        fh.seek(0)
+        if enabled:
+            fh.write(b'1')
+        else:
+            fh.write(b'0')
     return ret_val
 
 
@@ -71,25 +66,19 @@ def setPowersave(enabled):
 
     previous_governors = []
     for c in range(cpus):
-        fh = open('/sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor' % c,
-                  'r+b')
-        previous_governors.append(fh.read())
-        fh.seek(0)
-        fh.write(new_governors[c])
-        fh.close()
+        with open('/sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor' % c,
+                  'r+b') as fh:
+            previous_governors.append(fh.read())
+            fh.seek(0)
+            fh.write(new_governors[c])
 
 
 def setLowLatency(enabled):
-    fh = open('/proc/sys/net/ipv4/tcp_low_latency', 'r+b')
-    ret_val = False
-    if fh.read(1) == b'1':
-        ret_val = True
-
-    fh.seek(0)
-    if enabled:
-        fh.write(b'1')
-    else:
-        fh.write(b'0')
-    fh.close()
-
+    with open('/proc/sys/net/ipv4/tcp_low_latency', 'r+b') as fh:
+        ret_val = fh.read(1) == b'1'
+        fh.seek(0)
+        if enabled:
+            fh.write(b'1')
+        else:
+            fh.write(b'0')
     return ret_val

@@ -21,14 +21,14 @@ for i, runtime in enumerate((runtimes_0, runtimes_1)):
     runtime.sort()
     runtime = runtime[:10]
 
-    print('Top10 fastest responses for sample %s:' % i)
+    print(f'Top10 fastest responses for sample {i}:')
     pprint.pprint(runtime)
 
     averages.append(sum(runtime) / len(runtime))
 
 # Are all responses from sample 0 faster than the ones from sample 1?
 for avg in averages:
-    print('Average slowest response time: %s' % avg)
+    print(f'Average slowest response time: {avg}')
 
 avg_0 = averages[0]
 avg_1 = averages[1]

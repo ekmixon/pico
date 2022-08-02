@@ -39,11 +39,15 @@ def send_with_naive_timing(session, url, token):
     #
     # TODO: What happens if I want to send data? Do I need to add the
     #       Content-Type header manually?
-    req = requests.Request('GET',
-                           url,
-                           headers={'Authorization': 'Token %s' % token,
-                                    'Accept-Encoding': 'identity'}
-                           )
+    req = requests.Request(
+        'GET',
+        url,
+        headers={
+            'Authorization': f'Token {token}',
+            'Accept-Encoding': 'identity',
+        },
+    )
+
     prepared_request = req.prepare()
 
     response = session.send(prepared_request,
@@ -78,11 +82,11 @@ def send_requests(db, known_valid, test_case_1, test_case_2, missing_chars):
                                             test_case_2,
                                             missing_chars)
 
-    print('Collecting %s samples for:' % NUM_SAMPLES * 2)
-    print(' - %s' % token_test_case_1)
-    print(' - %s' % token_test_case_2)
+    print(f'Collecting {NUM_SAMPLES} samples for:' * 2)
+    print(f' - {token_test_case_1}')
+    print(f' - {token_test_case_2}')
     print('')
-    print('Test name: %s' % TEST_NAME)
+    print(f'Test name: {TEST_NAME}')
 
     for i in xrange(NUM_SAMPLES):
 
@@ -107,9 +111,12 @@ def send_requests(db, known_valid, test_case_1, test_case_2, missing_chars):
                 'capture_timestamp': time.time()}
 
         for j, (response, naive_time, token) in enumerate(tmp_results.values()):
-            data.update({'x_runtime_%s' % j: response.headers['X-Runtime'],
-                         'userspace_rtt_microseconds_%s' % j: naive_time,
-                         'token_%s' % j: token})
+            data |= {
+                f'x_runtime_{j}': response.headers['X-Runtime'],
+                f'userspace_rtt_microseconds_{j}': naive_time,
+                f'token_{j}': token,
+            }
+
 
         db.insert(data)
 
@@ -127,14 +134,18 @@ def warm_up(valid_token_start, success, fail, missing_char_length):
                                         missing_char_length)
 
     for token in (fail_token, success_token):
-        for i in xrange(WARM_UP_COUNT):
+        for _ in xrange(WARM_UP_COUNT):
             # TODO: What happens if I want to send data? Do I need to add the
             #       Content-Type header manually?
-            req = requests.Request('GET',
-                                   URL,
-                                   headers={'Authorization': 'Token %s' % token,
-                                            'Accept-Encoding': 'identity'}
-                                   )
+            req = requests.Request(
+                'GET',
+                URL,
+                headers={
+                    'Authorization': f'Token {token}',
+                    'Accept-Encoding': 'identity',
+                },
+            )
+
             prepared_request = req.prepare()
 
             # Use different sessions/TCP connections to potentially warm up
@@ -160,8 +171,7 @@ def init_os_settings():
     setCPUAffinity()
     setLowLatency(True)
     setPowersave(False)
-    tcpts_previous = setTCPTimestamps(True)
-    return tcpts_previous
+    return setTCPTimestamps(True)
 
 
 def clear_os_settings(tcpts_previous):

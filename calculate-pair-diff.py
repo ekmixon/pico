@@ -10,7 +10,7 @@ for sample in samples:
     diff = float(sample['x_runtime_0']) - float(sample['x_runtime_1'])
     diffs.append(diff)
 
-print('Summarized diff without filters: %s' % sum(diffs))
+print(f'Summarized diff without filters: {sum(diffs)}')
 
 filter_perc = 2.0
 diffs.sort()
